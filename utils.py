@@ -11,3 +11,5 @@ def show_menu():
     print("  [5] 🚪 Salir del sistema")
     print()
     print("*" * 40)
+    print("6. Mostrar tareas pendientes")
+    print("7. Mostrar tareas completadas")

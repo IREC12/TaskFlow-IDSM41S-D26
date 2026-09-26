@@ -74,7 +74,7 @@ def list_tasks(tasks):
         print("❌ Error al mostrar las tareas:", e)
 
 
-#  FUNCIÓN DE VALIDACIÓN DE ID
+# FUNCIÓN DE VALIDACIÓN DE ID
 def validar_task_id(task_id):
     """
     Valida que el task_id:
@@ -114,8 +114,9 @@ def complete_task(tasks, task_id):
     """
     try:
         task_id = validar_task_id(task_id)
+
         if task_id is None:
-            return  # 🔁 No se rompe el menú
+            return  # No se rompe el menú
 
         for task in tasks:
             if task[KEY_ID] == task_id:
@@ -133,11 +134,8 @@ def delete_task(tasks, task_id):
     """
     Elimina una tarea de la lista de tareas.
 
-    Valida el ID utilizando la función `validar_task_id`. Si el ID
-    es inválido, la función termina sin interrumpir el flujo del
-    programa. Si la tarea existe, deberá ser eliminada del listado.
-    Si no se encuentra una tarea con el ID proporcionado, se mostrará
-    un mensaje de error.
+    Solicita confirmación antes de eliminarla y actualiza los IDs
+    de las tareas restantes.
 
     Args:
         tasks (list): Lista de tareas existentes.
@@ -154,11 +152,14 @@ def delete_task(tasks, task_id):
 
     for task in tasks:
         if task["id"] == task_id:
-            confirm = input(f"¿Seguro que deseas eliminar '{task['title']}'? (s/n): ")
+            confirm = input(
+                f"¿Seguro que deseas eliminar '{task['title']}'? (s/n): "
+            )
 
             if confirm.lower() != "s":
                 print("Eliminación cancelada")
                 return
+
             tasks.remove(task)
 
             for i, t in enumerate(tasks):
@@ -168,3 +169,32 @@ def delete_task(tasks, task_id):
             return
 
     print("Error: ID no encontrado")
+
+
+# FILTRAR TAREAS POR ESTADO - RAFAEL RENTERIA
+def filter_tasks_by_status(tasks, completed):
+    """
+    Muestra las tareas que coinciden con el estado solicitado.
+
+    Crea una lista filtrada sin modificar las tareas originales.
+
+    Args:
+        tasks (list): Lista de tareas existentes.
+        completed (bool): False para pendientes, True para completadas.
+
+    Returns:
+        None
+    """
+    tareas_filtradas = [
+        task for task in tasks
+        if task[KEY_COMPLETED] == completed
+    ]
+
+    estado = "completadas" if completed else "pendientes"
+    print(f"\n--- Tareas {estado} ---")
+
+    if not tareas_filtradas:
+        print(f"No hay tareas {estado}.")
+        return
+
+    list_tasks(tareas_filtradas)
