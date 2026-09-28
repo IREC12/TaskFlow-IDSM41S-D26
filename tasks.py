@@ -131,13 +131,11 @@ def complete_task(tasks, task_id):
 
 def delete_task(tasks, task_id):
     """
-    Elimina una tarea de la lista de tareas.
+    Elimina una tarea de la lista mediante su ID.
 
-    Valida el ID utilizando la función `validar_task_id`. Si el ID
-    es inválido, la función termina sin interrumpir el flujo del
-    programa. Si la tarea existe, deberá ser eliminada del listado.
-    Si no se encuentra una tarea con el ID proporcionado, se mostrará
-    un mensaje de error.
+    Valida el ID utilizando la función validar_task_id.
+    Si el ID existe, elimina la tarea y muestra un mensaje.
+    Si no existe, informa al usuario.
 
     Args:
         tasks (list): Lista de tareas existentes.
@@ -147,24 +145,29 @@ def delete_task(tasks, task_id):
         None
     """
     try:
-        task_id = int(task_id)
-    except:
-        print("Error: ID inválido")
-        return
-
-    for task in tasks:
-        if task["id"] == task_id:
-            confirm = input(f"¿Seguro que deseas eliminar '{task['title']}'? (s/n): ")
-
-            if confirm.lower() != "s":
-                print("Eliminación cancelada")
-                return
-            tasks.remove(task)
-
-            for i, t in enumerate(tasks):
-                t["id"] = i + 1
-
-            print("Tarea eliminada")
+        task_id = validar_task_id(task_id)
+        if task_id is None:
             return
 
-    print("Error: ID no encontrado")
+        for task in tasks:
+            if task[KEY_ID] == task_id:
+                confirm = input(
+                    f"¿Seguro que deseas eliminar '{task[KEY_TITLE]}'? (s/n): "
+                )
+
+                if confirm.lower() != "s":
+                    print("Eliminación cancelada")
+                    return
+
+                tasks.remove(task)
+
+                for i, task in enumerate(tasks):
+                    task[KEY_ID] = i + 1
+
+                print("✅ Tarea eliminada")
+                return
+
+        print("❌ Error: No se encontró una tarea con ese ID")
+
+    except Exception as e:
+        print("❌ Error inesperado al eliminar la tarea:", e)
