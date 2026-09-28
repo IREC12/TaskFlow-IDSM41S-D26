@@ -5,9 +5,10 @@ from tasks import (
     delete_task
 )
 from storage import load_tasks, save_tasks
-from utils import show_menu
+from utils import show_menu, show_message, pause
 
 tasks = []
+
 
 def main():
     global tasks
@@ -15,49 +16,92 @@ def main():
 
     while True:
         show_menu()
-        option = input("Selecciona una opción: ").strip()
+        option = input("Selecciona una opción [1-5]: ").strip()
 
-        #  Validar que sea un número
+        # Validar que sea un número
         if not option.isdigit():
-            print("Error: Debes ingresar un número.")
+            show_message(
+                "Debes ingresar un número del 1 al 5.",
+                "error"
+            )
+            pause()
             continue
 
-        #  Validar rango de opciones
+        # Validar rango de opciones
         if option not in ["1", "2", "3", "4", "5"]:
-            print("Error: Opción fuera de rango.")
+            show_message(
+                "La opción seleccionada no existe. Elige del 1 al 5.",
+                "error"
+            )
+            pause()
             continue
 
         if option == "1":
+            print("\n--- AGREGAR NUEVA TAREA ---")
             title = input("Título de la tarea: ").strip()
-            add_task(tasks, title)
-            save_tasks(tasks)
+
+            if not title:
+                show_message(
+                    "El título de la tarea no puede estar vacío.",
+                    "warning"
+                )
+            else:
+                add_task(tasks, title)
+                save_tasks(tasks)
+                show_message(
+                    "La tarea fue registrada correctamente.",
+                    "success"
+                )
+
+            pause()
 
         elif option == "2":
+            print("\n--- LISTA DE TAREAS ---")
             list_tasks(tasks)
+            pause()
 
         elif option == "3":
+            print("\n--- COMPLETAR TAREA ---")
+
             try:
-                task_id = int(input("ID de la tarea a completar: ").strip())
+                task_id = int(
+                    input("ID de la tarea a completar: ").strip()
+                )
                 complete_task(tasks, task_id)
                 save_tasks(tasks)
             except ValueError:
-                print("ID inválido. Debe ser un número.")
+                show_message(
+                    "El ID debe ser un número.",
+                    "error"
+                )
+
+            pause()
 
         elif option == "4":
+            print("\n--- ELIMINAR TAREA ---")
+
             try:
-                task_id = int(input("ID de la tarea a eliminar: ").strip())
+                task_id = int(
+                    input("ID de la tarea a eliminar: ").strip()
+                )
                 delete_task(tasks, task_id)
                 save_tasks(tasks)
             except ValueError:
-                print("ID inválido. Debe ser un número.")
+                show_message(
+                    "El ID debe ser un número.",
+                    "error"
+                )
+
+            pause()
 
         elif option == "5":
             save_tasks(tasks)
-            print("¡Hasta luego!")
+            show_message(
+                "Cambios guardados. Gracias por utilizar TaskFlow.",
+                "success"
+            )
             break
 
-        else:
-            print("Opción inválida")
 
 if __name__ == "__main__":
     main()
