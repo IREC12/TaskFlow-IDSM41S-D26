@@ -43,35 +43,34 @@ def add_task(tasks, title):
 
     except Exception as e:
         print("❌ Error inesperado al agregar la tarea:", e)
+
+
+
+
+
 def list_tasks(tasks):
     """
-    Muestra en consola todas las tareas registradas.
-
-    Si la lista está vacía, informa al usuario que no hay tareas.
-    En caso contrario, imprime cada tarea mostrando su ID, título
-    y estado de completado.
-
-    Args:
-        tasks (list): Lista de tareas existentes.
-
-    Returns:
-        None
+    Muestra todas las tareas registradas con su ID, nombre y estado.
+    Si no existen tareas, muestra un mensaje informativo.
     """
-    try:
-        if not tasks:
-            print("No hay tareas")
-            return
+    if not tasks:
+        print("\n📋 No hay tareas registradas.")
+        return
 
-        for task in tasks:
-            task_id = task[KEY_ID]
-            title = task[KEY_TITLE]
-            status = task[KEY_STATUS]
+    print("\n===== TAREAS REGISTRADAS =====")
 
-            icon = "✔" if is_completed(task) else "✘"
-            print(f"{task_id}. {title} [{icon} {status}]")
+    for task in tasks:
+        task_id = task[KEY_ID]
+        nombre = task[KEY_TITLE]
+        estado = "Completada" if is_completed(task) else "Pendiente"
 
-    except Exception as e:
-        print("❌ Error al mostrar las tareas:", e)
+        print(f"ID: {task_id} | Nombre: {nombre} | Estado: {estado}")
+
+    print("==============================")
+
+
+
+
 
 
 #  FUNCIÓN DE VALIDACIÓN DE ID
