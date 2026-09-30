@@ -1,7 +1,3 @@
-# ==============================
-# MODELO DE DATOS (definido en models.py)
-# ==============================
-
 from models import (
     KEY_ID,
     KEY_TITLE,
@@ -19,37 +15,51 @@ def add_task(tasks, title):
     Valida que el título no esté vacío y que no exista otra tarea
     con el mismo título. La nueva tarea se registra inicialmente
     como pendiente.
+
+    Args:
+        tasks (list): Lista de tareas existentes.
+        title (str): Título de la nueva tarea.
+
+    Returns:
+        bool: True si la tarea se agregó correctamente.
+              False si no pudo agregarse.
     """
     try:
-        # Validar que el título no esté vacío
         if not title.strip():
             print("❌ Error: El título de la tarea no puede estar vacío.")
-            return
+            return False
 
-        # Verificar si ya existe una tarea con el mismo título
         title_lower = title.strip().lower()
 
-        if any(task[KEY_TITLE].lower() == title_lower for task in tasks):
+        if any(
+            task[KEY_TITLE].lower() == title_lower
+            for task in tasks
+        ):
             print("❌ Error: ya existe una tarea con ese título")
-            return
+            return False
 
-        new_task = create_task(tasks, title)
+        new_task = create_task(tasks, title.strip())
 
         tasks.append(new_task)
+
         print(f"✅ Tarea agregada con ID {new_task[KEY_ID]}")
+        return True
 
     except ValueError as e:
         print("❌ Error:", e)
+        return False
 
     except Exception as e:
         print("❌ Error inesperado al agregar la tarea:", e)
+        return False
+
+
 def list_tasks(tasks):
     """
     Muestra en consola todas las tareas registradas.
 
     Si la lista está vacía, informa al usuario que no hay tareas.
-    En caso contrario, imprime cada tarea mostrando su ID, título
-    y estado de completado.
+    En caso contrario, muestra el ID, título y estado de cada tarea.
 
     Args:
         tasks (list): Lista de tareas existentes.
@@ -68,28 +78,41 @@ def list_tasks(tasks):
             status = task[KEY_STATUS]
 
             icon = "✔" if is_completed(task) else "✘"
-            print(f"{task_id}. {title} [{icon} {status}]")
+
+            print(
+                f"{task_id}. {title} [{icon} {status}]"
+            )
 
     except Exception as e:
         print("❌ Error al mostrar las tareas:", e)
 
 
-#  FUNCIÓN DE VALIDACIÓN DE ID
 def validar_task_id(task_id):
     """
-    Valida que el task_id:
-    - Sea un número
-    - No sea negativo
-    - No rompa el programa si es inválido
+    Valida el identificador de una tarea.
+
+    Convierte el valor recibido a entero y verifica que sea mayor
+    que cero.
+
+    Args:
+        task_id (int | str): Identificador de la tarea.
+
+    Returns:
+        int | None: ID válido convertido a entero.
+                    None si el valor es inválido.
     """
     try:
         task_id = int(task_id)
-    except ValueError:
-        print("❌ Error: El ID debe ser un número (no letras ni símbolos).")
+
+    except (ValueError, TypeError):
+        print(
+            "❌ Error: El ID debe ser un número "
+            "(no letras ni símbolos)."
+        )
         return None
 
-    if task_id < 0:
-        print("❌ Error: El ID no puede ser negativo.")
+    if task_id <= 0:
+        print("❌ Error: El ID debe ser mayor que cero.")
         return None
 
     return task_id
@@ -99,100 +122,150 @@ def complete_task(tasks, task_id):
     """
     Marca una tarea como completada.
 
-    Valida el ID utilizando la función `validar_task_id`. Si el ID
-    es inválido, la función termina sin interrumpir el flujo del
-    programa. Si se encuentra la tarea correspondiente, cambia su
-    estado a completado. Si no existe una tarea con ese ID, muestra
-    un mensaje de error.
+    Valida el ID y busca la tarea correspondiente. Si la tarea
+    existe y aún no está completada, actualiza su estado.
 
     Args:
         tasks (list): Lista de tareas existentes.
-        task_id (int | str): Identificador de la tarea a completar.
+        task_id (int | str): Identificador de la tarea.
 
     Returns:
-        None
+        bool: True si la tarea fue completada correctamente.
+              False si no se realizó ningún cambio.
     """
     try:
         task_id = validar_task_id(task_id)
+
         if task_id is None:
-            return  # 🔁 No se rompe el menú
+            return False
 
         for task in tasks:
             if task[KEY_ID] == task_id:
+
                 if is_completed(task):
                     print("ℹ️ La tarea ya estaba completada")
-                    return
-                mark_completed(task)
-                print("✅ Tarea marcada como completada")
-                return
+                    return False
 
-        print("❌ Error: No se encontró una tarea con ese ID")
+                mark_completed(task)
+
+                print("✅ Tarea marcada como completada")
+                return True
+
+        print(
+            "❌ Error: No se encontró una tarea "
+            "con ese ID"
+        )
+        return False
 
     except Exception as e:
-        print("❌ Error inesperado al completar la tarea:", e)
+        print(
+            "❌ Error inesperado al completar la tarea:",
+            e
+        )
+        return False
 
 
 def delete_task(tasks, task_id):
     """
-    Elimina una tarea de la lista de tareas.
+    Elimina una tarea de la lista.
 
-    Valida el ID utilizando la función `validar_task_id`. Si el ID
-    es inválido, la función termina sin interrumpir el flujo del
-    programa. Si la tarea existe, deberá ser eliminada del listado.
-    Si no se encuentra una tarea con el ID proporcionado, se mostrará
-    un mensaje de error.
+    Valida el ID, solicita confirmación y elimina la tarea.
+    Después reorganiza los IDs restantes.
 
     Args:
         tasks (list): Lista de tareas existentes.
-        task_id (int | str): Identificador de la tarea a eliminar.
+        task_id (int | str): Identificador de la tarea.
 
     Returns:
-        None
+        bool: True si la tarea fue eliminada.
+              False si no se realizó ningún cambio.
     """
-    try:
-        task_id = int(task_id)
-    except:
-        print("Error: ID inválido")
-        return
+    task_id = validar_task_id(task_id)
+
+    if task_id is None:
+        return False
 
     for task in tasks:
         if task[KEY_ID] == task_id:
-            confirm = input(f"¿Seguro que deseas eliminar '{task[KEY_TITLE]}'? (s/n): ")
 
-            if confirm.lower() != "s":
+            confirm = input(
+                f"¿Seguro que deseas eliminar "
+                f"'{task[KEY_TITLE]}'? (s/n): "
+            ).strip().lower()
+
+            if confirm != "s":
                 print("Eliminación cancelada")
-                return
+                return False
+
             tasks.remove(task)
 
-            for i, t in enumerate(tasks):
-                t[KEY_ID] = i + 1
+            # Reorganizar IDs
+            for index, task_item in enumerate(
+                tasks,
+                start=1
+            ):
+                task_item[KEY_ID] = index
 
-            print("Tarea eliminada")
-            return
+            print("✅ Tarea eliminada")
+            return True
 
-    print("Error: ID no encontrado")
+    print("❌ Error: ID no encontrado")
+    return False
+
+
 def edit_task(tasks, task_id, new_title):
     """
-    Edita el nombre de una tarea existente.
+    Edita el título de una tarea existente.
 
-    Busca una tarea mediante su ID y modifica su título.
-    No permite guardar un nombre vacío.
+    Valida el ID, verifica que el nuevo título no esté vacío
+    y evita títulos duplicados.
+
+    Args:
+        tasks (list): Lista de tareas existentes.
+        task_id (int | str): Identificador de la tarea.
+        new_title (str): Nuevo título de la tarea.
+
+    Returns:
+        bool: True si la tarea fue editada correctamente.
+              False si no se realizó ningún cambio.
     """
+    task_id = validar_task_id(task_id)
 
-    try:
-        task_id = int(task_id)
-    except ValueError:
-        print("❌ Error: El ID debe ser un número.")
-        return
+    if task_id is None:
+        return False
 
-    if not new_title.strip():
-        print("❌ Error: El nombre de la tarea no puede estar vacío.")
-        return
+    new_title = new_title.strip()
+
+    if not new_title:
+        print(
+            "❌ Error: El nombre de la tarea "
+            "no puede estar vacío."
+        )
+        return False
+
+    # Evitar títulos duplicados
+    for task in tasks:
+        if (
+            task[KEY_ID] != task_id
+            and task[KEY_TITLE].lower()
+            == new_title.lower()
+        ):
+            print(
+                "❌ Error: ya existe una tarea "
+                "con ese título"
+            )
+            return False
 
     for task in tasks:
         if task[KEY_ID] == task_id:
-            task[KEY_TITLE] = new_title.strip()
-            print("✅ Tarea editada correctamente")
-            return
 
-    print("❌ Error: No se encontró una tarea con ese ID")
+            task[KEY_TITLE] = new_title
+
+            print("✅ Tarea editada correctamente")
+            return True
+
+    print(
+        "❌ Error: No se encontró una tarea "
+        "con ese ID"
+    )
+    return False
