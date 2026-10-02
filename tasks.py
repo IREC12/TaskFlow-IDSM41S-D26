@@ -211,3 +211,21 @@ def edit_task(tasks, task_id, new_title):
         "con ese ID"
     )
     return False
+
+
+# FILTRAR TAREAS POR ESTADO - RAFAEL RENTERIA
+def filter_tasks_by_status(tasks, completed):
+    """Muestra tareas por estado sin modificar los datos originales."""
+    tareas_filtradas = [
+        task for task in tasks
+        if is_completed(task) == completed
+    ]
+
+    estado = "completadas" if completed else "pendientes"
+    print(f"\n--- Tareas {estado} ---")
+
+    if not tareas_filtradas:
+        print(f"No hay tareas {estado}.")
+        return
+
+    list_tasks(tareas_filtradas)

@@ -3,7 +3,8 @@ from tasks import (
     list_tasks,
     complete_task,
     delete_task,
-    edit_task
+    edit_task,
+    filter_tasks_by_status
 )
 
 from storage import load_tasks, save_tasks
@@ -27,21 +28,21 @@ def main():
     while True:
         show_menu()
 
-        option = input("Selecciona una opción [1-6]: ").strip()
+        option = input("Selecciona una opción [1-8]: ").strip()
 
         # Validar que la opción sea un número
         if not option.isdigit():
             show_message(
-                "Debes ingresar un número del 1 al 6.",
+                "Debes ingresar un número del 1 al 8.",
                 "error"
             )
             pause()
             continue
 
         # Validar rango de opciones
-        if option not in ["1", "2", "3", "4", "5", "6"]:
+        if option not in ["1", "2", "3", "4", "5", "6", "7", "8"]:
             show_message(
-                "La opción seleccionada no existe. Elige del 1 al 6.",
+                "La opción seleccionada no existe. Elige del 1 al 8.",
                 "error"
             )
             pause()
@@ -110,8 +111,13 @@ def main():
 
             pause()
 
+        # Filtrar tareas por estado
+        elif option in ("6", "7"):
+            filter_tasks_by_status(tasks, option == "7")
+            pause()
+
         # Salir
-        elif option == "6":
+        elif option == "8":
             save_tasks(tasks)
             show_message(
                 "Cambios guardados. Gracias por utilizar TaskFlow.",

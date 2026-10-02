@@ -9,7 +9,9 @@ def show_menu():
     print("  [3] ✅ Marcar tarea como completada")
     print("  [4] 🗑️  Eliminar una tarea")
     print("  [5] ✏️  Editar una tarea")
-    print("  [6] 🚪 Salir del sistema")
+    print("  [6] Mostrar tareas pendientes")
+    print("  [7] Mostrar tareas completadas")
+    print("  [8] 🚪 Salir del sistema")
     print()
     print("*" * 40)
 
